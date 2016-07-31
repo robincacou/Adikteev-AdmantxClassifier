@@ -5,5 +5,17 @@ target/
 lib_managed/
 src_managed/
 test-output/
+
 *.iml
 .classpath_nb
+*.class
+*.ipr
+*.iws
+.idea
+out
+
+tags
+.*.swp
+.*.swo
+
+.DS_Store
