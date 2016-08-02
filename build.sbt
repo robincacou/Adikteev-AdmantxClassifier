@@ -16,6 +16,7 @@ libraryDependencies ++= {
     "io.spray"            %   "spray-http_2.11"    % sprayV,
     "io.spray"            %   "spray-httpx_2.11"   % sprayV,
     "io.spray"            %   "spray-util_2.11"    % sprayV,
+    "org.apache.kafka"    %   "kafka_2.10"    % "0.10.0.0",
     "com.alibaba"         %   "fastjson"      % "1.1.21",
     "com.typesafe.akka"   %%  "akka-actor"    % akkaV,
     "com.typesafe.akka"   %%  "akka-testkit"  % akkaV   % "test",
