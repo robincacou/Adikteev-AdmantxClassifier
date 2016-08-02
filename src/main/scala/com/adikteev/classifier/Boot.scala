@@ -1,4 +1,4 @@
-package com.example
+package com.adikteev.classifier
 
 import akka.actor.{ActorSystem, Props}
 import akka.io.IO
