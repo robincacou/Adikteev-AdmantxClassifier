@@ -1,22 +1,28 @@
 package com.adikteev.classifier
 
 import scala.util.{Failure, Success}
+import scala.concurrent.ExecutionContext.Implicits.global
 import java.net.URLEncoder
 
+import akka.actor.ActorSystem
 import akka.io.IO
 import akka.pattern.ask
+import akka.util.Timeout
 import org.apache.samza.config.Config
 import org.apache.samza.system.IncomingMessageEnvelope
 
 import collection.mutable
-import org.apache.samza.task.{TaskContext, _}
+import org.apache.samza.task._
 import spray.can.Http
 import spray.http.{HttpResponse, StatusCodes}
 import spray.httpx.RequestBuilding._
+import scala.concurrent.duration._
 
 import scala.concurrent.Future
 
-class ClassifierStreamTask extends StreamTask with InitableTask with WindowableTask {
+class ClassifierStreamTask extends StreamTask with WindowableTask {
+  implicit val system = ActorSystem()
+  implicit val timeout = Timeout(5.seconds)
 
   val tokensForDay = 10000
   val secondsBetweenWindows = 30
@@ -32,10 +38,6 @@ class ClassifierStreamTask extends StreamTask with InitableTask with WindowableT
 
     val currentReach = reachStore.getOrElse(url, 0)
     reachStore.put(url, currentReach + 1)
-  }
-
-  override def init(config: Config, context: TaskContext): Unit = {
-
   }
 
   def createAdmatxRequest(url: String): String = {
@@ -55,10 +57,10 @@ class ClassifierStreamTask extends StreamTask with InitableTask with WindowableT
 
   // Classify the top N reached urls
   override def window(collector: MessageCollector, coordinator: TaskCoordinator): Unit = {
-    tokensForNextWindow += (tokensForOneSecond * secondsBetweenWindows)
+    tokensForNextWindow += Math.floor(tokensForOneSecond * secondsBetweenWindows.toFloat).toInt
 
     val sortedReachs = reachStore.toArray.sortBy(urlReachTupple => urlReachTupple._2)
-    val actualTokensSpent = Math.min(sortedReachs.length, tokensForNextWindow)
+    var actualTokensSpent = Math.min(sortedReachs.length, tokensForNextWindow)
     val toClassify = sortedReachs.takeRight(actualTokensSpent)
 
     toClassify.foreach(urlAndReach => {
@@ -68,12 +70,12 @@ class ClassifierStreamTask extends StreamTask with InitableTask with WindowableT
           Storage.classifStore.put(url, r.entity.asString)
           reachStore.remove(url)
         case Failure(error) =>
+          // Since the call failed, we will save this token for the next window
+          actualTokensSpent -= 1
           System.err.println("[callAdmantx] Could not classify: " + url + "\n" + error)
       }
     })
 
-    // We consume the tokens for each call, maybe we should not decrement the counter
-    // when the admantx call has failed ?
     tokensForNextWindow -= actualTokensSpent
   }
 }

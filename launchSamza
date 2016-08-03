@@ -1,0 +1,1 @@
+hello-samza/deploy/samza/bin/run-job.sh --config-factory=org.apache.samza.config.factories.PropertiesConfigFactory --config-path=file:/Users/ro.cassan/proj/Adikteev-AdmantxClassifier/classifier-stream.properties 
