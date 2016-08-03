@@ -18,7 +18,6 @@ libraryDependencies ++= {
     "io.spray"            %   "spray-util_2.11"    % sprayV,
     "org.apache.kafka"    %   "kafka_2.11"    % "0.10.0.0",
     "org.apache.samza"    %   "samza-api"     % "0.10.0",
-    "com.alibaba"         %   "fastjson"      % "1.1.21",
     "com.typesafe.akka"   %%  "akka-actor"    % akkaV,
     "com.typesafe.akka"   %%  "akka-testkit"  % akkaV   % "test",
     "org.specs2"          %%  "specs2-core"   % "2.3.11" % "test"
